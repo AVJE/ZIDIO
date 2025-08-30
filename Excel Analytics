@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExcelAnalytics Pro - Full MERN Stack Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        .upload-area { transition: all 0.3s ease; }
+        .upload-area:hover { transform: translateY(-2px); }
+        .chart-container { position: relative; height: 300px; }
+        .code-block { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        .tab-button { transition: all 0.2s; }
+        .tab-button.active { background: #059669; color: white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Authentication Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900">ExcelAnalytics Pro</h1>
+                <p class="text-gray-600 mt-2">Full MERN Stack Excel Analytics Platform</p>
+            </div>
+
+            <!-- Auth Toggle Tabs -->
+            <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                <button id="loginTab" onclick="showAuthForm('login')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all bg-white text-gray-900 shadow-sm">
+                    Sign In
+                </button>
+                <button id="signupTab" onclick="showAuthForm('signup')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                    Sign Up
+                </button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your email" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-green-700 hover:to-blue-700 transition-all font-medium">
+                    Sign In to Analytics
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form hidden space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="signupName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your full name" required>
+                    <div id="nameError" class="text-red-500 text-xs mt-1 hidden">Name must be at least 2 characters long</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="signupEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your email" required>
+                    <div id="emailError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid email address</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="signupPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Create a password" required>
+                    <div id="passwordError" class="text-red-500 text-xs mt-1 hidden">Password must be at least 6 characters long</div>
+                    <div class="mt-2">
+                        <div class="flex items-center space-x-2 text-xs">
+                            <div id="lengthCheck" class="flex items-center text-gray-400">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                At least 6 characters
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Confirm your password" required>
+                    <div id="confirmError" class="text-red-500 text-xs mt-1 hidden">Passwords do not match</div>
+                </div>
+
+                <div class="flex items-start">
+                    <input type="checkbox" id="agreeTerms" class="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" required>
+                    <label for="agreeTerms" class="ml-2 text-sm text-gray-600">
+                        I agree to the <a href="#" class="text-green-600 hover:text-green-500">Terms of Service</a> and <a href="#" class="text-green-600 hover:text-green-500">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-green-700 hover:to-blue-700 transition-all font-medium">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">Demo account:</p>
+                <button onclick="quickLogin()" class="text-xs text-green-600 hover:text-green-500 mt-1">analyst@demo.com / password</button>
+            </div>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <p class="text-sm text-green-800">Account created successfully! You can now sign in.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainDashboard" class="hidden min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="ml-3 text-xl font-semibold text-gray-900">ExcelAnalytics Pro</span>
+                        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">MERN</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6">
+                        <button onclick="showSection('upload')" class="nav-btn text-sm text-gray-600 hover:text-gray-900 transition-colors">Upload</button>
+                        <button onclick="showSection('analytics')" class="nav-btn text-sm text-gray-600 hover:text-gray-900 transition-colors">Analytics</button>
+                        <button onclick="showSection('backend')" class="nav-btn text-sm text-gray-600 hover:text-gray-900 transition-colors">Backend</button>
+                        <button onclick="showSection('api')" class="nav-btn text-sm text-gray-600 hover:text-gray-900 transition-colors">API Docs</button>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-700">Welcome, <span id="userName" class="font-medium">Analyst</span></span>
+                            <button onclick="logout()" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Upload Section -->
+        <div id="uploadSection" class="section max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Excel File Upload</h1>
+                <p class="text-gray-600 mt-2">Upload and process Excel files for analytics</p>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                <div id="uploadArea" class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-green-400 hover:bg-green-50 cursor-pointer transition-all">
+                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Drop Excel files here</h3>
+                    <p class="text-gray-600 mb-4">or click to browse (.xlsx, .xls, .csv)</p>
+                    <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Choose Files
+                    </button>
+                    <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls,.csv" multiple>
+                </div>
+            </div>
+
+            <!-- Processing Status -->
+            <div id="processingStatus" class="hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mr-4"></div>
+                    <div>
+                        <h3 class="font-medium text-gray-900">Processing Files...</h3>
+                        <p class="text-sm text-gray-600">Analyzing data structure and generating insights</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="bg-green-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">Processing: <span id="currentStep">Uploading file...</span></p>
+                </div>
+            </div>
+
+            <!-- Uploaded Files List -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Recent Uploads</h2>
+                </div>
+                <div class="p-6">
+                    <div id="filesList" class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">sales_data_2024.xlsx</h3>
+                                    <p class="text-sm text-gray-600">Uploaded 2 hours ago • 1,247 rows • 12 columns</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Processed</span>
+                                <button onclick="analyzeFile('sales_data_2024.xlsx')" class="text-blue-600 hover:text-blue-500 text-sm font-medium">Analyze</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">customer_analytics.csv</h3>
+                                    <p class="text-sm text-gray-600">Uploaded 1 day ago • 3,456 rows • 8 columns</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Processed</span>
+                                <button onclick="analyzeFile('customer_analytics.csv')" class="text-blue-600 hover:text-blue-500 text-sm font-medium">Analyze</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analyticsSection" class="section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Data Analytics Dashboard</h1>
+                <p class="text-gray-600 mt-2">Interactive charts and insights from your Excel data</p>
+            </div>
+
+            <!-- Analytics Controls -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                <div class="flex flex-wrap items-center gap-4">
+                    <select id="datasetSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option>Select Dataset</option>
+                        <option value="sales">sales_data_2024.xlsx</option>
+                        <option value="customers">customer_analytics.csv</option>
+                    </select>
+                    
+                    <select id="chartTypeSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option>Chart Type</option>
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="scatter">Scatter Plot</option>
+                    </select>
+                    
+                    <button onclick="generateChart()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Generate Chart
+                    </button>
+                    
+                    <button onclick="exportAnalysis()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Export Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Sales Trend Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Sales Trend Analysis</h3>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Revenue Distribution -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Data Insights -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalRevenue">$2.4M</p>
+                            <p class="text-sm text-green-600">+12.5% from last month</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Active Customers</p>
+                            <p class="text-2xl font-bold text-gray-900" id="activeCustomers">3,456</p>
+                            <p class="text-sm text-blue-600">+8.2% growth rate</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Avg Order Value</p>
+                            <p class="text-2xl font-bold text-gray-900" id="avgOrderValue">$694</p>
+                            <p class="text-sm text-purple-600">+5.7% increase</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Preview -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Data Preview</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="dataTableBody">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Product A</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$12,450</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">125</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">North</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-16</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Product B</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$8,750</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">87</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">South</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-17</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Product C</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$15,200</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">152</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">East</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backend Section -->
+        <div id="backendSection" class="section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Backend Implementation</h1>
+                <p class="text-gray-600 mt-2">Complete MERN stack backend code and architecture</p>
+            </div>
+
+            <!-- Backend Architecture -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">System Architecture</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <span class="text-white font-bold">M</span>
+                        </div>
+                        <h3 class="font-medium text-gray-900">MongoDB</h3>
+                        <p class="text-sm text-gray-600">Database Layer</p>
+                    </div>
+                    <div class="text-center p-4 bg-red-50 rounded-lg">
+                        <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <span class="text-white font-bold">E</span>
+                        </div>
+                        <h3 class="font-medium text-gray-900">Express.js</h3>
+                        <p class="text-sm text-gray-600">Backend Framework</p>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <span class="text-white font-bold">R</span>
+                        </div>
+                        <h3 class="font-medium text-gray-900">React.js</h3>
+                        <p class="text-sm text-gray-600">Frontend Library</p>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                        <div class="w-12 h-12 bg-yellow-600 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            <span class="text-white font-bold">N</span>
+                        </div>
+                        <h3 class="font-medium text-gray-900">Node.js</h3>
+                        <p class="text-sm text-gray-600">Runtime Environment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Tabs -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex space-x-2">
+                        <button onclick="showCodeTab('server')" class="tab-button px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white">Server Setup</button>
+                        <button onclick="showCodeTab('models')" class="tab-button px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Models</button>
+                        <button onclick="showCodeTab('routes')" class="tab-button px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Routes</button>
+                        <button onclick="showCodeTab('middleware')" class="tab-button px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Middleware</button>
+                        <button onclick="showCodeTab('utils')" class="tab-button px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Utils</button>
+                    </div>
+                </div>
+
+                <!-- Server Setup Tab -->
+                <div id="serverTab" class="code-tab p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">server.js - Express Server Setup</h3>
+                    <div class="code-block">
+<pre><code>const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/excel-analytics', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+  console.log('Connected to MongoDB');
+});
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/files', require('./routes/files'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/reports', require('./routes/reports'));
+
+// File upload configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.xlsx', '.xls', '.csv'];
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(fileExt)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only Excel and CSV files are allowed.'));
+    }
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});</code></pre>
+                    </div>
+                </div>
+
+                <!-- Models Tab -->
+                <div id="modelsTab" class="code-tab hidden p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">MongoDB Models</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">models/User.js</h4>
+                            <div class="code-block">
+<pre><code>const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+userSchema.methods.comparePassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+module.exports = mongoose.model('User', userSchema);</code></pre>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">models/ExcelFile.js</h4>
+                            <div class="code-block">
+<pre><code>const mongoose = require('mongoose');
+
+const excelFileSchema = new mongoose.Schema({
+  filename: {
+    type: String,
+    required: true
+  },
+  originalName: {
+    type: String,
+    required: true
+  },
+  filePath: {
+    type: String,
+    required: true
+  },
+  fileSize: {
+    type: Number,
+    required: true
+  },
+  mimeType: {
+    type: String,
+    required: true
+  },
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  processedData: {
+    headers: [String],
+    rowCount: Number,
+    columnCount: Number,
+    summary: mongoose.Schema.Types.Mixed
+  },
+  analytics: {
+    charts: [mongoose.Schema.Types.Mixed],
+    insights: [mongoose.Schema.Types.Mixed],
+    statistics: mongoose.Schema.Types.Mixed
+  },
+  status: {
+    type: String,
+    enum: ['uploading', 'processing', 'completed', 'error'],
+    default: 'uploading'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('ExcelFile', excelFileSchema);</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Routes Tab -->
+                <div id="routesTab" class="code-tab hidden p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">API Routes</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">routes/files.js</h4>
+                            <div class="code-block">
+<pre><code>const express = require('express');
+const multer = require('multer');
+const XLSX = require('xlsx');
+const csv = require('csv-parser');
+const fs = require('fs');
+const ExcelFile = require('../models/ExcelFile');
+const auth = require('../middleware/auth');
+
+const router = express.Router();
+
+// File upload endpoint
+router.post('/upload', auth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Create file record
+    const excelFile = new ExcelFile({
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      filePath: req.file.path,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      uploadedBy: req.user.id,
+      status: 'processing'
+    });
+
+    await excelFile.save();
+
+    // Process file asynchronously
+    processExcelFile(excelFile._id, req.file.path);
+
+    res.json({
+      message: 'File uploaded successfully',
+      fileId: excelFile._id,
+      filename: req.file.originalname
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get user files
+router.get('/my-files', auth, async (req, res) => {
+  try {
+    const files = await ExcelFile.find({ uploadedBy: req.user.id })
+      .sort({ createdAt: -1 });
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Process Excel file function
+async function processExcelFile(fileId, filePath) {
+  try {
+    const file = await ExcelFile.findById(fileId);
+    
+    let data = [];
+    const fileExt = path.extname(filePath).toLowerCase();
+    
+    if (fileExt === '.csv') {
+      // Process CSV
+      data = await processCSV(filePath);
+    } else {
+      // Process Excel
+      data = await processExcel(filePath);
+    }
+
+    // Generate analytics
+    const analytics = generateAnalytics(data);
+    
+    // Update file record
+    file.processedData = {
+      headers: data.length > 0 ? Object.keys(data[0]) : [],
+      rowCount: data.length,
+      columnCount: data.length > 0 ? Object.keys(data[0]).length : 0,
+      summary: generateSummary(data)
+    };
+    file.analytics = analytics;
+    file.status = 'completed';
+    file.updatedAt = new Date();
+    
+    await file.save();
+    
+  } catch (error) {
+    await ExcelFile.findByIdAndUpdate(fileId, { 
+      status: 'error',
+      updatedAt: new Date()
+    });
+  }
+}
+
+module.exports = router;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middleware Tab -->
+                <div id="middlewareTab" class="code-tab hidden p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Authentication Middleware</h3>
+                    <div class="code-block">
+<pre><code>const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
+const auth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token.' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token.' });
+  }
+};
+
+const adminAuth = async (req, res, next) => {
+  try {
+    await auth(req, res, () => {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Access denied. Admin required.' });
+      }
+      next();
+    });
+  } catch (error) {
+    res.status(403).json({ error: 'Access denied.' });
+  }
+};
+
+module.exports = { auth, adminAuth };</code></pre>
+                    </div>
+                </div>
+
+                <!-- Utils Tab -->
+                <div id="utilsTab" class="code-tab hidden p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Utility Functions</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-2">utils/excelProcessor.js</h4>
+                            <div class="code-block">
+<pre><code>const XLSX = require('xlsx');
+const csv = require('csv-parser');
+const fs = require('fs');
+
+// Process Excel files
+const processExcel = (filePath) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const workbook = XLSX.readFile(filePath);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+      resolve(data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// Process CSV files
+const processCSV = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', () => resolve(results))
+      .on('error', (error) => reject(error));
+  });
+};
+
+// Generate analytics from data
+const generateAnalytics = (data) => {
+  if (!data || data.length === 0) return {};
+
+  const analytics = {
+    charts: [],
+    insights: [],
+    statistics: {}
+  };
+
+  // Generate basic statistics
+  const numericColumns = getNumericColumns(data);
+  
+  numericColumns.forEach(column => {
+    const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
+    
+    analytics.statistics[column] = {
+      count: values.length,
+      sum: values.reduce((a, b) => a + b, 0),
+      average: values.reduce((a, b) => a + b, 0) / values.length,
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  });
+
+  // Generate chart data
+  if (numericColumns.length > 0) {
+    analytics.charts.push({
+      type: 'bar',
+      title: 'Column Statistics',
+      data: numericColumns.map(col => ({
+        label: col,
+        value: analytics.statistics[col].sum
+      }))
+    });
+  }
+
+  return analytics;
+};
+
+// Helper function to identify numeric columns
+const getNumericColumns = (data) => {
+  if (!data || data.length === 0) return [];
+  
+  const firstRow = data[0];
+  return Object.keys(firstRow).filter(key => {
+    const value = firstRow[key];
+    return !isNaN(parseFloat(value)) && isFinite(value);
+  });
+};
+
+module.exports = {
+  processExcel,
+  processCSV,
+  generateAnalytics
+};</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation Section -->
+        <div id="apiSection" class="section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">API Documentation</h1>
+                <p class="text-gray-600 mt-2">Complete REST API reference for Excel analytics</p>
+            </div>
+
+            <!-- API Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Base URL</h2>
+                    <div class="code-block">
+                        <code>https://api.excelanalytics.com/v1</code>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-medium text-gray-900 mb-2">Authentication</h3>
+                        <p class="text-sm text-gray-600">All API requests require a valid JWT token in the Authorization header:</p>
+                        <div class="code-block mt-2">
+                            <code>Authorization: Bearer your_jwt_token_here</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Response Format</h2>
+                    <div class="code-block">
+<pre><code>{
+  "success": true,
+  "data": {...},
+  "message": "Operation completed successfully",
+  "timestamp": "2024-01-15T10:30:00Z"
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Endpoints -->
+            <div class="space-y-6">
+                <!-- Authentication Endpoints -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Authentication</h2>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium mr-3">POST</span>
+                                <code class="text-sm font-mono text-gray-900">/auth/register</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Register a new user account</p>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Request Body</h4>
+                                    <div class="code-block">
+<pre><code>{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securepassword"
+}</code></pre>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Response</h4>
+                                    <div class="code-block">
+<pre><code>{
+  "success": true,
+  "data": {
+    "user": {...},
+    "token": "jwt_token_here"
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium mr-3">POST</span>
+                                <code class="text-sm font-mono text-gray-900">/auth/login</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Authenticate user and get access token</p>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Request Body</h4>
+                                    <div class="code-block">
+<pre><code>{
+  "email": "john@example.com",
+  "password": "securepassword"
+}</code></pre>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Response</h4>
+                                    <div class="code-block">
+<pre><code>{
+  "success": true,
+  "data": {
+    "user": {...},
+    "token": "jwt_token_here"
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Management Endpoints -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">File Management</h2>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium mr-3">POST</span>
+                                <code class="text-sm font-mono text-gray-900">/files/upload</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Upload Excel or CSV file for processing</p>
+                            <div class="code-block">
+<pre><code>curl -X POST https://api.excelanalytics.com/v1/files/upload \
+  -H "Authorization: Bearer your_token" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@sales_data.xlsx"</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium mr-3">GET</span>
+                                <code class="text-sm font-mono text-gray-900">/files/my-files</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Get list of uploaded files</p>
+                            <div class="code-block">
+<pre><code>curl -X GET https://api.excelanalytics.com/v1/files/my-files \
+  -H "Authorization: Bearer your_token"</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Endpoints -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Analytics</h2>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium mr-3">GET</span>
+                                <code class="text-sm font-mono text-gray-900">/analytics/:fileId</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Get analytics data for a specific file</p>
+                            <div class="code-block">
+<pre><code>curl -X GET https://api.excelanalytics.com/v1/analytics/64f7b1234567890abcdef123 \
+  -H "Authorization: Bearer your_token"</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium mr-3">POST</span>
+                                <code class="text-sm font-mono text-gray-900">/analytics/generate-chart</code>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Generate custom chart from data</p>
+                            <div class="code-block">
+<pre><code>curl -X POST https://api.excelanalytics.com/v1/analytics/generate-chart \
+  -H "Authorization: Bearer your_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fileId": "64f7b1234567890abcdef123",
+    "chartType": "bar",
+    "xAxis": "date",
+    "yAxis": "revenue"
+  }'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentSection = 'upload';
+        let salesChart = null;
+        let revenueChart = null;
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        let currentAuthForm = 'login';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('login');
+            setupFileUpload();
+            setupFormValidation();
+        });
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Check demo account
+            if (email === 'analyst@demo.com' && password === 'password') {
+                login('Data Analyst');
+                return;
+            }
+            
+            // Check registered users
+            const user = registeredUsers.find(u => u.email === email && u.password === password);
+            if (user) {
+                login(user.name);
+            } else {
+                showError('Invalid credentials. Please check your email and password.');
+            }
+        });
+
+        // Handle signup
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate form
+            if (!validateSignupForm(name, email, password, confirmPassword)) {
+                return;
+            }
+            
+            // Check if user already exists
+            if (registeredUsers.find(u => u.email === email)) {
+                showError('An account with this email already exists.');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                name: name,
+                email: email,
+                password: password, // In real app, this would be hashed
+                createdAt: new Date().toISOString()
+            };
+            
+            registeredUsers.push(newUser);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            
+            // Show success message and switch to login
+            showSuccessMessage();
+            setTimeout(() => {
+                showAuthForm('login');
+                document.getElementById('loginEmail').value = email;
+            }, 2000);
+        });
+
+        function quickLogin() {
+            document.getElementById('loginEmail').value = 'analyst@demo.com';
+            document.getElementById('loginPassword').value = 'password';
+            login('Data Analyst');
+        }
+
+        function login(name) {
+            currentUser = name;
+            document.getElementById('userName').textContent = name;
+            showScreen('main');
+            showSection('upload');
+            initializeCharts();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            showScreen('login');
+        }
+
+        function showScreen(screen) {
+            document.getElementById('loginScreen').classList.toggle('hidden', screen !== 'login');
+            document.getElementById('mainDashboard').classList.toggle('hidden', screen !== 'main');
+        }
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            
+            // Remove active state from nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-green-600', 'font-medium');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // Show selected section
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            // Add active state to clicked nav button
+            if (event && event.target) {
+                event.target.classList.add('text-green-600', 'font-medium');
+                event.target.classList.remove('text-gray-600');
+            }
+            
+            currentSection = section;
+            
+            // Initialize charts when analytics section is shown
+            if (section === 'analytics' && !salesChart) {
+                setTimeout(initializeCharts, 100);
+            }
+        }
+
+        // File upload functionality
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-green-400', 'bg-green-50');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('border-green-400', 'bg-green-50');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-green-400', 'bg-green-50');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const statusDiv = document.getElementById('processingStatus');
+                const progressBar = document.getElementById('progressBar');
+                const currentStep = document.getElementById('currentStep');
+                
+                statusDiv.classList.remove('hidden');
+                
+                // Simulate file processing steps
+                const steps = [
+                    { text: 'Uploading file...', progress: 20 },
+                    { text: 'Parsing Excel data...', progress: 40 },
+                    { text: 'Analyzing data structure...', progress: 60 },
+                    { text: 'Generating insights...', progress: 80 },
+                    { text: 'Creating visualizations...', progress: 100 }
+                ];
+                
+                let currentStepIndex = 0;
+                
+                const processStep = () => {
+                    if (currentStepIndex < steps.length) {
+                        const step = steps[currentStepIndex];
+                        currentStep.textContent = step.text;
+                        progressBar.style.width = step.progress + '%';
+                        currentStepIndex++;
+                        setTimeout(processStep, 800);
+                    } else {
+                        setTimeout(() => {
+                            statusDiv.classList.add('hidden');
+                            alert(`Successfully processed ${files.length} file(s)! Check the Analytics section for insights.`);
+                            updateRealTimeData();
+                        }, 500);
+                    }
+                };
+                
+                processStep();
+            }
+        }
+
+        function analyzeFile(filename) {
+            alert(`Analyzing ${filename}... Switching to Analytics dashboard.`);
+            showSection('analytics');
+        }
+
+        function generateChart() {
+            const dataset = document.getElementById('datasetSelect').value;
+            const chartType = document.getElementById('chartTypeSelect').value;
+            
+            if (!dataset || !chartType) {
+                alert('Please select both dataset and chart type');
+                return;
+            }
+            
+            alert(`Generating ${chartType} chart for ${dataset}...`);
+            // Simulate chart generation
+            updateCharts();
+        }
+
+        function exportAnalysis() {
+            alert('Exporting analysis data as Excel workbook...');
+        }
+
+        function updateRealTimeData() {
+            // Simulate real-time data updates
+            const revenue = document.getElementById('totalRevenue');
+            const customers = document.getElementById('activeCustomers');
+            const avgOrder = document.getElementById('avgOrderValue');
+            
+            if (revenue) revenue.textContent = '$' + (2.4 + Math.random() * 0.2).toFixed(1) + 'M';
+            if (customers) customers.textContent = (3456 + Math.floor(Math.random() * 100)).toLocaleString();
+            if (avgOrder) avgOrder.textContent = '$' + (694 + Math.floor(Math.random() * 50));
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart');
+            if (salesCtx && !salesChart) {
+                salesChart = new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Sales',
+                            data: [12000, 19000, 15000, 25000, 22000, 30000],
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + (value / 1000) + 'K';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx && !revenueChart) {
+                revenueChart = new Chart(revenueCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Product A', 'Product B', 'Product C', 'Product D'],
+                        datasets: [{
+                            data: [35, 25, 25, 15],
+                            backgroundColor: [
+                                'rgb(34, 197, 94)',
+                                'rgb(59, 130, 246)',
+                                'rgb(168, 85, 247)',
+                                'rgb(249, 115, 22)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateCharts() {
+            if (salesChart) {
+                // Update with new random data
+                const newData = Array.from({length: 6}, () => Math.floor(Math.random() * 20000) + 10000);
+                salesChart.data.datasets[0].data = newData;
+                salesChart.update();
+            }
+            
+            if (revenueChart) {
+                // Update with new random data
+                const newData = Array.from({length: 4}, () => Math.floor(Math.random() * 30) + 10);
+                revenueChart.data.datasets[0].data = newData;
+                revenueChart.update();
+            }
+        }
+
+        // Code tab functionality
+        function showCodeTab(tabName) {
+            // Hide all code tabs
+            document.querySelectorAll('.code-tab').forEach(tab => tab.classList.add('hidden'));
+            
+            // Remove active state from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'bg-green-600', 'text-white');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active state to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active', 'bg-green-600', 'text-white');
+                event.target.classList.remove('text-gray-600');
+            }
+        }
+
+        // Authentication form functions
+        function showAuthForm(formType) {
+            currentAuthForm = formType;
+            
+            // Toggle tab appearance
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            
+            if (formType === 'login') {
+                loginTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                loginTab.classList.remove('text-gray-600');
+                signupTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                signupTab.classList.add('text-gray-600');
+                
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            } else {
+                signupTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                signupTab.classList.remove('text-gray-600');
+                loginTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                loginTab.classList.add('text-gray-600');
+                
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+            
+            // Clear any error messages
+            clearErrors();
+            hideSuccessMessage();
+        }
+
+        function setupFormValidation() {
+            const signupPassword = document.getElementById('signupPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            // Real-time password validation
+            signupPassword.addEventListener('input', function() {
+                validatePasswordStrength(this.value);
+            });
+            
+            confirmPassword.addEventListener('input', function() {
+                validatePasswordMatch();
+            });
+            
+            // Real-time email validation
+            document.getElementById('signupEmail').addEventListener('blur', function() {
+                validateEmail(this.value, 'emailError');
+            });
+            
+            // Real-time name validation
+            document.getElementById('signupName').addEventListener('blur', function() {
+                validateName(this.value);
+            });
+        }
+
+        function validateSignupForm(name, email, password, confirmPassword) {
+            let isValid = true;
+            
+            // Validate name
+            if (!validateName(name)) isValid = false;
+            
+            // Validate email
+            if (!validateEmail(email, 'emailError')) isValid = false;
+            
+            // Validate password
+            if (!validatePasswordStrength(password)) isValid = false;
+            
+            // Validate password match
+            if (!validatePasswordMatch()) isValid = false;
+            
+            return isValid;
+        }
+
+        function validateName(name) {
+            const nameError = document.getElementById('nameError');
+            if (name.length < 2) {
+                showFieldError('nameError', 'Name must be at least 2 characters long');
+                return false;
+            }
+            hideFieldError('nameError');
+            return true;
+        }
+
+        function validateEmail(email, errorId) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showFieldError(errorId, 'Please enter a valid email address');
+                return false;
+            }
+            hideFieldError(errorId);
+            return true;
+        }
+
+        function validatePasswordStrength(password) {
+            const lengthCheck = document.getElementById('lengthCheck');
+            const passwordError = document.getElementById('passwordError');
+            
+            if (password.length >= 6) {
+                lengthCheck.classList.remove('text-gray-400');
+                lengthCheck.classList.add('text-green-600');
+                hideFieldError('passwordError');
+                return true;
+            } else {
+                lengthCheck.classList.remove('text-green-600');
+                lengthCheck.classList.add('text-gray-400');
+                if (password.length > 0) {
+                    showFieldError('passwordError', 'Password must be at least 6 characters long');
+                }
+                return false;
+            }
+        }
+
+        function validatePasswordMatch() {
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                showFieldError('confirmError', 'Passwords do not match');
+                return false;
+            }
+            hideFieldError('confirmError');
+            return true;
+        }
+
+        function showFieldError(errorId, message) {
+            const errorElement = document.getElementById(errorId);
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+
+        function hideFieldError(errorId) {
+            const errorElement = document.getElementById(errorId);
+            errorElement.classList.add('hidden');
+        }
+
+        function clearErrors() {
+            const errorIds = ['nameError', 'emailError', 'passwordError', 'confirmError'];
+            errorIds.forEach(id => hideFieldError(id));
+        }
+
+        function showError(message) {
+            alert(message); // In a real app, you'd show a proper error notification
+        }
+
+        function showSuccessMessage() {
+            document.getElementById('successMessage').classList.remove('hidden');
+        }
+
+        function hideSuccessMessage() {
+            document.getElementById('successMessage').classList.add('hidden');
+        }
+
+        // Auto-update real-time data every 30 seconds
+        setInterval(updateRealTimeData, 30000);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9764b2f5c7d2800a',t:'MTc1NjM5MzQ0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
